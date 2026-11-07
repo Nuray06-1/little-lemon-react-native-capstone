@@ -42,10 +42,10 @@ No backend, credentials, API keys or environment variables are required. The men
 
 ```sh
 npm test
-npx expo export --platform web
+npx expo export --platform all
 ```
 
-Six automated model tests pass. Web export passes. Browser checks cover disabled onboarding, successful onboarding, combined search/categories, profile population, save/reload, Back and logout/reload. Native iOS/Android runtime testing has not been performed; native screens use Expo-compatible dependencies.
+Six automated model tests pass. Web, iOS and Android JavaScript bundle exports pass. Browser checks cover disabled onboarding, successful onboarding, combined search/categories, profile population, save/reload, Back and logout/reload. Native iOS/Android runtime testing has not been performed; native screens use Expo-compatible dependencies.
 
 ## Scope
 
