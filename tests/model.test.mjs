@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validProfile,filterMenu,readProfile,writeProfile,clearProfile,PROFILE_KEY} from '../src/model.mjs';
+const memory=()=>{const map=new Map([['other-app','keep']]);return {map,async getItem(k){return map.get(k)||null},async setItem(k,v){map.set(k,v)},async removeItem(k){map.delete(k)}}};
+test('onboarding requires a name and valid email',()=>{for(const p of [{firstName:' ',email:'a@b.com'},{firstName:'A',email:'bad'},{firstName:'A',email:''}])assert.equal(validProfile(p),false);assert.equal(validProfile({firstName:'Ana',email:'ana@example.com'}),true)});
+test('profile survives storage reload with preferences',async()=>{const s=memory();await writeProfile(s,{firstName:' Ana ',email:'ana@example.com ',newsletter:true});assert.equal((await readProfile(s)).firstName,'Ana');assert.equal((await readProfile(s)).newsletter,true)});
+test('logout removes profile without deleting other applications',async()=>{const s=memory();await writeProfile(s,{firstName:'Ana',email:'ana@example.com'});await clearProfile(s);assert.equal(await readProfile(s),null);assert.equal(s.map.get('other-app'),'keep')});
+test('invalid saved JSON returns onboarding',async()=>{const s=memory();await s.setItem(PROFILE_KEY,'invalid');assert.equal(await readProfile(s),null)});
+test('search is case-insensitive and intersects category selection',()=>{const menu=[{title:'Greek Salad',description:'Feta',category:'starters'},{title:'Lemon Cake',description:'Lemon',category:'desserts'}];assert.equal(filterMenu(menu,'FETA')[0].title,'Greek Salad');assert.deepEqual(filterMenu(menu,'lemon',['starters']),[]);assert.equal(filterMenu(menu,'',['desserts']).length,1);assert.equal(filterMenu(menu).length,2)});
+test('failed storage does not report a saved profile',async()=>{await assert.rejects(writeProfile({async setItem(){throw Error('disk')}},{firstName:'Ana',email:'ana@example.com'}),/disk/)});
